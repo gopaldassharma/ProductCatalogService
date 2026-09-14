@@ -34,7 +34,6 @@ public class ProductController {
 
     @GetMapping("{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long id){
-        try {
             if (id <= 0) {
                 throw new IllegalArgumentException("Product Id is Invalid");
             }
@@ -47,9 +46,6 @@ public class ProductController {
                 productDto.setCategory(categoryDto);
             }
             return new ResponseEntity<>(productDto, HttpStatus.OK);
-        }catch (IllegalArgumentException e){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
     }
 
     @PostMapping
@@ -95,7 +91,10 @@ public class ProductController {
         }
         return productDto;
     }
-
+    @ExceptionHandler({IllegalArgumentException.class, NullPointerException.class})
+    public ResponseEntity<String> handleException(Exception e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
 
 }
