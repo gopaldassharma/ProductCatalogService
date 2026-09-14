@@ -1,5 +1,6 @@
 package com.example.productcatalogservice.services;
 
+import com.example.productcatalogservice.clients.FakeStoreApiClient;
 import com.example.productcatalogservice.dtos.FakeStoreProductDto;
 import com.example.productcatalogservice.models.Category;
 import com.example.productcatalogservice.models.Product;
@@ -13,19 +14,24 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class FakeStoreProductService implements IProductService{
+
     @Autowired
     private RestTemplateBuilder restTemplateBuilder;
 
+    @Autowired
+    private FakeStoreApiClient fakeStoreApiClient;
+
     @Override
     public Product getProductById(Long id) {
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<FakeStoreProductDto> fakeStoreProductDtoResponseEntity = restTemplate.getForEntity("https://fakestoreapi.com/products/{id}", FakeStoreProductDto.class, id);
-        if(fakeStoreProductDtoResponseEntity.getStatusCode().is2xxSuccessful() && fakeStoreProductDtoResponseEntity.hasBody()) {
-            return getProduct(fakeStoreProductDtoResponseEntity.getBody());
+        FakeStoreProductDto fakeStoreProductDto = fakeStoreApiClient.getProductById(id);
+        if(fakeStoreProductDto != null){
+            return getProduct(fakeStoreProductDto);
         }
         return null;
     }
@@ -37,7 +43,13 @@ public class FakeStoreProductService implements IProductService{
 
     @Override
     public List<Product> getAllProducts() {
-        return List.of();
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        FakeStoreProductDto[] fakeStoreProductDto = restTemplate.getForEntity("https://fakestoreapi.com/products", FakeStoreProductDto[].class).getBody();
+        List<Product> products = new ArrayList<>();
+        for(FakeStoreProductDto f:  fakeStoreProductDto) {
+            products.add(getProduct(f));
+        }
+        return products;
     }
 
     @Override
@@ -73,7 +85,7 @@ public class FakeStoreProductService implements IProductService{
         return fakeStoreProductDto;
     }
 
-    private <T> ResponseEntity<T> requestForEntity(String url,HttpMethod httpMethod, @Nullable Object request, Class<T> responseType, Object... uriVariables) throws RestClientException {
+    private <T> ResponseEntity<T> requestForEntity(String url, HttpMethod httpMethod, @Nullable Object request, Class<T> responseType, Object... uriVariables) throws RestClientException {
         RestTemplate restTemplate = restTemplateBuilder.build();
         RequestCallback requestCallback = restTemplate.httpEntityCallback(request, responseType);
         ResponseExtractor<ResponseEntity<T>> responseExtractor = restTemplate.responseEntityExtractor(responseType);

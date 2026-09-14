@@ -9,21 +9,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import static org.springframework.beans.BeanUtils.copyProperties;
 
 @RestController
+@RequestMapping("/products")
 public class ProductController {
 
     @Autowired
     IProductService productService;
 
-    @GetMapping("/products")
+    @GetMapping
     public List<ProductDto> getProducts(){
-        return null;
+        List<ProductDto> response = new ArrayList<>();
+        List<Product> products = productService.getAllProducts();
+        for(Product product: products){
+            response.add(getProductDto(product));
+
+        }
+        return response;
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long id){
         try {
             if (id <= 0) {
@@ -43,12 +52,12 @@ public class ProductController {
         }
     }
 
-    @PostMapping("/products/create")
+    @PostMapping
     public ProductDto createProduct(@RequestBody ProductDto product){
         return product;
     }
 
-    @PutMapping("/products/{id}")
+    @PutMapping("{id}")
     public ProductDto replaceProduct(@PathVariable("id") Long Id, @RequestBody ProductDto productDto){
         Product input = getProduct(productDto);
         Product product = productService.replaceProduct(input, Id);
