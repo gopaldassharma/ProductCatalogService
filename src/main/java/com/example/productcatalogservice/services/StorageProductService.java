@@ -32,7 +32,7 @@ public class StorageProductService implements IProductService{
 
     @Override
     public List<Product> getAllProducts() {
-        return List.of();
+        return  productRepo.findAll();
     }
 
     @Override
