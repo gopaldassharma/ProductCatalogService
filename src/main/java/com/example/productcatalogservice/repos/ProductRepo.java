@@ -1,6 +1,8 @@
 package com.example.productcatalogservice.repos;
 
 import com.example.productcatalogservice.models.Product;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +17,7 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     List<Product> findAllByIsPrimeTrue();
     List<Product> findAllByOrderByPriceDesc();
     List<Product> findAllByOrderByPriceAsc();
-
+    List<Product> findProductByName(String query, Pageable pageable);
     // Native query
 
 //    @Query("Select p.name  ")

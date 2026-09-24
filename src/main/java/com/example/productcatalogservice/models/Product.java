@@ -16,4 +16,5 @@ public class Product extends BaseModel{
     private String imageUrl;
     @ManyToOne(cascade = CascadeType.ALL)
     private Category category;
+    private boolean isPrime;
 }
